@@ -1,0 +1,32 @@
+name: Check | Lint, Unit & E2E Tests
+
+on:
+  # Run the "check" sequence for all PR's to catch issues early before merging
+  # into anotherr branch.
+  pull_request:
+
+jobs:
+  checkCode:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read .nvmrc
+        run: echo "::set-output name=NVMRC::$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
+
+      - name: Install Node.js dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test
+        run: echo "replace this line with your extra tests!"

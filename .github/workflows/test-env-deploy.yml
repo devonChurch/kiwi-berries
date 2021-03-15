@@ -1,0 +1,51 @@
+name: Test Environment | Build and Deploy
+
+on:
+  # Whenever a change is made to the trunk we make a build to keep the feed back
+  # loop quick and identify issues early during the development process.
+  push:
+    branches:    
+      - 'main'
+    
+  # Allow us to trigger a build manually - useful for setting up a scenario for QA.
+  # @see https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#workflow_dispatch
+  workflow_dispatch:
+
+jobs:
+  buildAndDeploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # Extract the version from .nvmrc and save it as an "output parameter" for
+      # future use.
+      # This allows us to use a consistent Node.js version between local development
+      # and CI.
+      # @see https://github.com/actions/setup-node/issues/32#issuecomment-539794249
+      # @see https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-output-parameter
+      - name: Read .nvmrc
+        run: echo "::set-output name=NVMRC::$(cat .nvmrc)"
+        id: nvm
+
+      # Use our saved .nvmrc "output parameter" to initialise our specific version
+      # of Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
+
+      # Emulate `npm ci` as closely as possible with yarn.
+      # @see https://classic.yarnpkg.com/en/docs/cli/install/#toc-yarn-install-frozen-lockfile
+      - name: Install Node.js dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test
+        run: echo "replace this line with your extra tests!"
+
+      - name: Deploy Artifact
+        run: echo "deploying to test!"
