@@ -14,6 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # @see https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions
+      # @see https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/migrating-from-azure-pipelines-to-github-actions#migrating-conditionals-and-expression-syntax
+      - name: Check Branch
+        if: ${{ !startsWith(github.ref, 'refs/heads/release/') }}
+        run: exit 1
+
       - name: Read .nvmrc
         run: echo "::set-output name=NVMRC::$(cat .nvmrc)"
         id: nvm
@@ -34,3 +40,4 @@ jobs:
 
       - name: Deploy Artifact
         run: echo "deploying to live!"
+
